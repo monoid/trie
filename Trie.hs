@@ -4,6 +4,22 @@ import Data.List
 import Data.Maybe
 
 
+-- Trie that maps [a] to b.  For example, Trie Char Int maps strings to ints.
+-- Internal node may either hold or do not hold data:
+--
+-- a: 10
+-- a b c: 20
+--
+-- Then root node a will hold 10, node a b will hold no data. and a b c will
+-- hold 20.
+--
+-- [Trie a b] is a list of children.
+--
+-- We keep piece of key in a node, but it would be better to keep some kind of
+-- map from piece of key to child node instead.
+-- Because of this decision, buildTrie returns list of nodes, not a Trie,
+-- because root node has no piece of key.
+-- But that's enough for our modest task.
 data Trie a b = Trie a (Maybe b) [Trie a b]
               deriving Show
 
