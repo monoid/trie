@@ -1,4 +1,4 @@
-module Trie (Trie, trieDataList, trieNodeList, buildTrie, trie, trie') where
+module Trie (Trie(..), trieDataList, trieNodeList, buildTrie, trie, trie') where
 import Data.Function
 import Data.List
 import Data.Maybe
@@ -21,7 +21,7 @@ import Data.Maybe
 -- because root node has no piece of key.
 -- But that's enough for our modest task.
 data Trie a b = Trie a (Maybe b) [Trie a b]
-              deriving Show
+              deriving (Show, Eq)
 
 -- trie construction helper functions; mostly for debug
 trie :: a -> b -> Trie a b
