@@ -2,6 +2,7 @@ module Trie (Trie(..), trieDataList, trieNodeList, buildTrie, trie, trie') where
 import Data.Function
 import Data.List
 import Data.Maybe
+import Data.List.HT as HT
 
 
 -- Trie that maps [a] to b.  For example, Trie Char Int maps strings to ints.
@@ -43,7 +44,7 @@ trieNodeList n@(Trie _ _ children) = ([n] ++
 buildTrie :: (Eq key, Show key, Show val) => [([key], val)] -> [Trie key val]
 buildTrie items =
   map buildHelper groups
-  where groups = groupBy headCmp items
+  where groups = HT.groupBy headCmp items
         headCmp = (==) `on` (head . fst)
 
         tail' ((_:xs), val) = (xs, val)
