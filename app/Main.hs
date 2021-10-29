@@ -1,11 +1,11 @@
 import qualified Data.ByteString.Lazy.Char8 as B
-import Data.Function
-import Data.List
 import Trie
 
+record2 :: B.ByteString -> ([B.ByteString], [B.ByteString])
 record2 line = (B.split ' ' a, b)
       where (a:b) = B.split '\t' line     
 
+yrecord :: B.ByteString -> [B.ByteString]
 yrecord line = B.split '\t' line
 
 -- По неизвестной причине у нас иногда встречаются дубли.
@@ -14,11 +14,13 @@ yrecord line = B.split '\t' line
 -- filterDups recs = map head $ groupBy ((==) `on` fst) recs
 
 -- STUB
+filterDups:: a -> a
 filterDups = id
 
+main:: IO ()
 main = do
   stdline <- B.getContents -- >>= (return . GZip.decompress)
-  let lines = B.split '\n' stdline
+  let lines' = B.split '\n' stdline
   -- TODO remove empty last line
-  let records = filterDups $ map record2 $ filter (not . B.null) lines
+  let records = filterDups $ map record2 $ filter (not . B.null) lines'
   putStrLn ("Len: " ++ (show $ length $ concatMap trieNodeList $ buildTrie records))
