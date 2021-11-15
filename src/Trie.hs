@@ -1,6 +1,5 @@
 module Trie (Trie(..), trieDataList, trieNodeList, buildTrie, trie, trie') where
 import Data.Function
-import Data.List
 import Data.Maybe
 import Data.List.HT as HT
 
@@ -33,11 +32,11 @@ trie' a b blist = Trie a (Just b) (map (uncurry trie) blist)
 
 -- map over data or nodes
 trieDataList :: Trie a1 a2 -> [a2]
-trieDataList = catMaybes . map (\(Trie _ b _) -> b) . trieNodeList
+trieDataList = mapMaybe (\(Trie _ b _) -> b) . trieNodeList
 
 trieNodeList :: Trie a b -> [Trie a b]
-trieNodeList n@(Trie _ _ children) = ([n] ++
-                                      concatMap trieNodeList children)
+trieNodeList n@(Trie _ _ children) = n :
+                                      concatMap trieNodeList children
 
 
 -- buildTrie and its helper functions
@@ -47,7 +46,7 @@ buildTrie items =
   where groups = HT.groupBy headCmp items
         headCmp = (==) `on` (head . fst)
 
-        tail' ((_:xs), val) = (xs, val)
+        tail' (_:xs, val) = (xs, val)
 
         buildHelper items' = case items' of
           ([], _):_ -> error $ show items'
