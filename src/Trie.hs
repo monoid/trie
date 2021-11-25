@@ -1,7 +1,8 @@
 module Trie (Trie(..), trieDataList, trieNodeList, buildTrie, trie, trie') where
-import Data.Function
-import Data.Maybe
-import Data.List.HT as HT
+import Data.Function ( on )
+import Data.Maybe ( mapMaybe )
+import Data.List.HT as HT ( groupBy )
+import Data.Tree
 
 
 -- Trie that maps [a] to b.  For example, Trie Char Int maps strings to ints.
@@ -20,22 +21,22 @@ import Data.List.HT as HT
 -- Because of this decision, buildTrie returns list of nodes, not a Trie,
 -- because root node has no piece of key.
 -- But that's enough for our modest task.
-data Trie a b = Trie a (Maybe b) [Trie a b]
-              deriving (Show, Eq)
+
+type Trie a b = Tree (a, Maybe b)
 
 -- trie construction helper functions; mostly for debug
 trie :: a -> b -> Trie a b
-trie a b = Trie a (Just b) []
+trie a b = Node (a, Just b) []
 
 trie' :: a -> b -> [(a, b)] -> Trie a b
-trie' a b blist = Trie a (Just b) (map (uncurry trie) blist)
+trie' a b blist = Node (a, Just b) (map (uncurry trie) blist)
 
 -- map over data or nodes
 trieDataList :: Trie a1 a2 -> [a2]
-trieDataList = mapMaybe (\(Trie _ b _) -> b) . trieNodeList
+trieDataList = mapMaybe (\(Node (_, b) _) -> b) . trieNodeList
 
 trieNodeList :: Trie a b -> [Trie a b]
-trieNodeList n@(Trie _ _ children) = n :
+trieNodeList n@(Node _ children) = n :
                                       concatMap trieNodeList children
 
 
@@ -46,11 +47,12 @@ buildTrie items =
   where groups = HT.groupBy headCmp items
         headCmp = (==) `on` (head . fst)
 
+        -- groups are always non-empty
         tail' (_:xs, val) = (xs, val)
 
         buildHelper items' = case items' of
           ([], _):_ -> error $ show items'
           -- first key is one element key; thus new node will hold its data
-          ([k], dat):tailer -> Trie k (Just dat) (buildTrie $ map tail' tailer)
+          ([k], dat):tailer -> Node (k, Just dat) (buildTrie $ map tail' tailer)
           -- otherwise it is node without data
-          items''@(((k:_), _):_) -> Trie k Nothing (buildTrie $ map tail' items'')
+          items''@(((k:_), _):_) -> Node (k, Nothing) (buildTrie $ map tail' items'')
