@@ -1,8 +1,11 @@
-module Trie (Trie(..), trieDataList, trieNodeList, buildTrie, trie, trie') where
+module Trie (
+  trieDataList, trieNodeList, buildTrie, trie, trie', trieValueList
+) where
 import Data.Function ( on )
 import Data.Maybe ( mapMaybe )
 import Data.List.HT as HT ( groupBy )
 import Data.Tree
+import Data.Foldable (Foldable(toList))
 
 
 -- Trie that maps [a] to b.  For example, Trie Char Int maps strings to ints.
@@ -32,13 +35,14 @@ trie' :: a -> b -> [(a, b)] -> Trie a b
 trie' a b blist = Node (a, Just b) (map (uncurry trie) blist)
 
 -- map over data or nodes
-trieDataList :: Trie a1 a2 -> [a2]
-trieDataList = mapMaybe (\(Node (_, b) _) -> b) . trieNodeList
+trieValueList :: Trie a1 a2 -> [a2]
+trieValueList = mapMaybe snd . trieDataList
+
+trieDataList :: Trie a b -> [(a, Maybe b)]
+trieDataList = toList
 
 trieNodeList :: Trie a b -> [Trie a b]
-trieNodeList n@(Node _ children) = n :
-                                      concatMap trieNodeList children
-
+trieNodeList = traverse (:[])
 
 -- buildTrie and its helper functions
 buildTrie :: (Eq key, Show key, Show val) => [([key], val)] -> [Trie key val]
