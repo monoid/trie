@@ -51,12 +51,17 @@ buildTrie items =
   where groups = HT.groupBy headCmp items
         headCmp = (==) `on` (head . fst)
 
-        -- groups are always non-empty
+        -- groups are always non-empty: buildHelper catches early empty and
+        -- one-element lists.
         tail' (_:xs, val) = (xs, val)
+        tail' ([], _) = error "can't happen: buildHelper invariant failed"
 
         buildHelper items' = case items' of
-          ([], _):_ -> error $ show items'
+          [] -> error "Cannot build a trie from an empty list"
+          -- it can heppen on an empty input line; further it is maintained
+          -- to never happen.
+          ([], _):_ -> error $ "Failed on an empty key: " ++ show items'
           -- first key is one element key; thus new node will hold its data
           ([k], dat):tailer -> Node (k, Just dat) (buildTrie $ map tail' tailer)
-          -- otherwise it is node without data
-          items''@(((k:_), _):_) -> Node (k, Nothing) (buildTrie $ map tail' items'')
+          -- otherwise it is a node without data
+          items''@((k:_, _):_) -> Node (k, Nothing) (buildTrie $ map tail' items'')
